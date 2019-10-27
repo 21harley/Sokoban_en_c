@@ -3,9 +3,9 @@
 #include <conio.h>
 #include <windows.h>
 
-/* sokoban por john llanes 22-10-2019 */
+/* sokoban por john llanes inicio 22-10-2019 */
 
-int x1=15,y1=23;
+int x1=15;int y1=23;
 int xp=0 ,yp=0,caja=0,f=0;
 
 void gotoxy(int x,int y)
@@ -151,8 +151,6 @@ void mostrar(int m[x1][y1],int x, int y,int ficha[30][2]){
 		printf("\n");
 	}
 }
-
-
 int perdio(int m[x1][y1],int ficha[30][2]){
 	int i,j;int gameOver=0,ban=0;
 	for(i=0;i<x1;i++)
@@ -180,13 +178,14 @@ int perdio(int m[x1][y1],int ficha[30][2]){
 	}
 	return gameOver;
 }
-int main(int argc, char *argv[]){
+
+void juego(){
 	 int mapa[x1][y1];
 	 int ficha[30][2];
      int mundo=0;
      char tecla=' ';
    while(mundo<4&&tecla!='q'){
-   	 int valor1=1,valor2=2,ban=0;
+   	 int valorx1=1,valorx2=2,valory1=1,valory2=2,ban=0;
     if(tecla!='r') mundo++;system("cls");
 	mapaCarga(mundo,mapa,ficha);				 
 	mostrar(mapa,x1,y1,ficha);
@@ -196,47 +195,34 @@ int main(int argc, char *argv[]){
     		tecla=getch();
     		tecla=tolower(tecla);
 			switch(tecla){
-    			case 'w':case 's':
-    				if('w'==tecla){valor1=-1;valor2=-2;} 
+    			case 'w':case 's':case 'a':case 'd':
+    				switch(tecla){
+    					case 'w':valory1=valory2=0;valorx1=-1;valorx2=-2;break;
+    					case 's':valory1=valory2=0;break;
+    					case 'a':valorx1=valorx2=0;valory1=-1;valory2=-2;break;
+    					case 'd':valorx1=valorx2=0;break;
+					} 
     				//case sin caja
-					if(mapa[xp+valor1][yp]==0){
-                        mapa[xp+valor1][yp]=7;mapa[xp][yp]=ult;ult=0;
+					if(mapa[xp+valorx1][yp+valory1]==0){
+                        mapa[xp+valorx1][yp+valory1]=7;mapa[xp][yp]=ult;ult=0;
 					}
-					if(mapa[xp+valor1][yp]==5){
-						mapa[xp+valor1][yp]=7;mapa[xp][yp]=ult;ult=5;
+					if(mapa[xp+valorx1][yp+valory1]==5){
+						mapa[xp+valorx1][yp+valory1]=7;mapa[xp][yp]=ult;ult=5;
 					}
 					//caso con caja					
-					if(mapa[xp+valor1][yp]==4&&mapa[xp+valor2][yp]==0){
-						mapa[xp+valor1][yp]=7;mapa[xp][yp]=ult;mapa[xp+valor2][yp]=4;ult=0;
+					if(mapa[xp+valorx1][yp+valory1]==4&&mapa[xp+valorx2][yp+valory2]==0){
+						mapa[xp+valorx1][yp+valory1]=7;mapa[xp][yp]=ult;mapa[xp+valorx2][yp+valory2]=4;ult=0;
 					}
-					if(mapa[xp+valor1][yp]==4&&mapa[xp+valor2][yp]==5){
-						mapa[xp][yp]=ult;mapa[xp+valor1][yp]=7;mapa[xp+valor2][yp]=4;ult=0;
+					if(mapa[xp+valorx1][yp+valory1]==4&&mapa[xp+valorx2][yp+valory2]==5){
+						mapa[xp][yp]=ult;mapa[xp+valorx1][yp+valory1]=7;mapa[xp+valorx2][yp+valory2]=4;ult=0;
 					}
 					recarga(mapa,ficha);	
     			break;
-				case 'a':case 'd':
-					if('a'==tecla){valor1=-1;valor2=-2;} 
-					//caso sin caja
-					if(mapa[xp][yp+valor1]==0){
-                        mapa[xp][yp+valor1]=7;mapa[xp][yp]=ult;ult=0;
-					}
-					if(mapa[xp][yp+valor1]==5){
-                        mapa[xp][yp+valor1]=7;mapa[xp][yp]=ult;ult=5;
-					}
-					//caso con caja
-					if(mapa[xp][yp+valor1]==4&&mapa[xp][yp+valor2]==0){
-						mapa[xp][yp]=ult;mapa[xp][yp+valor1]=7;mapa[xp][yp+valor2]=4;ult=0;
-					}	
-					if(mapa[xp][yp+valor1]==4&&mapa[xp][yp+valor2]==5){
-						mapa[xp][yp]=ult;mapa[xp][yp+valor1]=7;mapa[xp][yp+valor2]=4;ult=0;
-					}
-					recarga(mapa,ficha);							
-				break;
 				case 'r':m=1;system("cls");break;
 				case 'q':m=1;break;	
 		    }
 		    if(tecla!='r'||tecla!='q'){
-		     recarga(mapa,ficha);valor1=1;valor2=2;system("cls");mostrar(mapa,x1,y1,ficha);
+		     recarga(mapa,ficha);valorx1=1,valorx2=2,valory1=1,valory2=2;system("cls");mostrar(mapa,x1,y1,ficha);
 		  	 printf("\n Cajas por apilar:%i ",f);
 		  	 int res=perdio(mapa,ficha);
 		  	 res>0?printf("Perdio precione 'r' %i \n",res):printf(" ");
@@ -247,7 +233,45 @@ int main(int argc, char *argv[]){
 		printf("Ganastes :DDD \n");
 	} 	
    }
-
-	printf("Gracias por jugar :DDD");
+    if(tecla!='q') printf("Gracias por jugar :DDD"); system("pause");
+}
+struct jugadorInformacion{
+	int matriz[15][23];
+	int mov;
+	int mundo;
+	char nombre[20];
+};
+int main(int argc, char *argv[]){
+    int menu=0,estado=0;
+    while(menu!=5){
+    	system("cls");
+    	      printf("+-----------------------------+\n");
+    	      printf("|            *Sokoban*        |\n");
+    	      printf("|        1)--->Jugar          |\n");
+if(estado==1) printf("|        2)--->Continuar      |\n"); 
+    	      printf("|        3)--->Instruciones   |\n");
+    	      printf("|        4)--->Estadisticas   |\n");
+    		  printf("|        5)--->Salir          |\n");
+    	      printf("+-----------------------------+\n");
+		scanf("%i",&menu);
+		switch(menu){
+			case 1:
+				estado=1;
+				juego();/*juego 0*/
+			break;
+			
+			case 2:
+				/*juego 1*/
+			break;
+			
+			case 3:
+				/*cargar archivo*/
+			break;
+			
+			case 4:
+			   /*cargar archivo*/
+			break;
+		}		   	    	    	
+	}
 	return 0;
 }
