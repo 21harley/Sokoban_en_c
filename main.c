@@ -5,8 +5,9 @@
 
 /* sokoban por john llanes inicio 22-10-2019 */
 
-int x1=15;int y1=23;
-int xp=0 ,yp=0,caja=0,f=0;
+int x1=15;int y1=23;       /*mapa*/
+int xp=0 ,yp=0,caja=0,f=0; /*jugador*/
+typedef char cadena[20];  /*nombre jugador*/
 
 void gotoxy(int x,int y)
 {
@@ -46,8 +47,15 @@ void recarga(int m[x1][y1],int ficha[30][2]){
 
 	}
 }
-void mapaCarga(int t,int m[x1][y1],int ficha[30][2]){
-  caja=0;
+
+struct registro{
+	int mund[3];
+	cadena jug[3];
+};
+
+void mapaCarga(int t,int m[x1][y1],int ficha[30][2],struct registro *r){
+  caja=0;int i=0,j=0,cont=0;
+ 
   int  m1[15][23]={  0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,
 	                 0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,
 	                 0,0,0,0,0,0,0,1,4,0,0,1,0,0,0,0,0,0,0,0,0,0,0,
@@ -102,7 +110,7 @@ void mapaCarga(int t,int m[x1][y1],int ficha[30][2]){
 		
 		case 3:cambio(m,m3);break;
 	}
-	int i=0,j=0,cont=0;
+
 	for(i=0;i<30;i++){
 		for(j=0;j<2;j++){
 			ficha[i][j]=0;
@@ -178,17 +186,23 @@ int perdio(int m[x1][y1],int ficha[30][2]){
 	}
 	return gameOver;
 }
+struct jugadorInformacion{
+	int mapa[15][23];
+	int mov;
+	int mundo;
+	cadena nombre;
+	int estado;
+	int ficha[30][2];
+};
 
-void juego(){
-	 int mapa[x1][y1];
-	 int ficha[30][2];
-     int mundo=0;
+void juego(struct jugadorInformacion *jugador,struct registro *r){
      char tecla=' ';
-   while(mundo<4&&tecla!='q'){
+     if(jugador->estado==1) jugador->mundo=0;
+   while(jugador->mundo<4&&tecla!='q'){
    	 int valorx1=1,valorx2=2,valory1=1,valory2=2,ban=0;
-    if(tecla!='r') mundo++;system("cls");
-	mapaCarga(mundo,mapa,ficha);				 
-	mostrar(mapa,x1,y1,ficha);
+    if(tecla!='r'&&jugador->estado==1) jugador->mundo++;system("cls");
+	if(jugador->estado==1) mapaCarga(jugador->mundo,jugador->mapa,jugador->ficha,r);				 
+	mostrar(jugador->mapa,x1,y1,jugador->ficha);
     int m=0,ult=0,ult1=0;
     while(f!=0&&m!=1){
     	if(kbhit()){
@@ -203,65 +217,79 @@ void juego(){
     					case 'd':valorx1=valorx2=0;break;
 					} 
     				//case sin caja
-					if(mapa[xp+valorx1][yp+valory1]==0){
-                        mapa[xp+valorx1][yp+valory1]=7;mapa[xp][yp]=ult;ult=0;
+					if(jugador->mapa[xp+valorx1][yp+valory1]==0){
+                        jugador->mapa[xp+valorx1][yp+valory1]=7;jugador->mapa[xp][yp]=ult;ult=0;
 					}
-					if(mapa[xp+valorx1][yp+valory1]==5){
-						mapa[xp+valorx1][yp+valory1]=7;mapa[xp][yp]=ult;ult=5;
+					if(jugador->mapa[xp+valorx1][yp+valory1]==5){
+						jugador->mapa[xp+valorx1][yp+valory1]=7;jugador->mapa[xp][yp]=ult;ult=5;
 					}
 					//caso con caja					
-					if(mapa[xp+valorx1][yp+valory1]==4&&mapa[xp+valorx2][yp+valory2]==0){
-						mapa[xp+valorx1][yp+valory1]=7;mapa[xp][yp]=ult;mapa[xp+valorx2][yp+valory2]=4;ult=0;
+					if(jugador->mapa[xp+valorx1][yp+valory1]==4&&jugador->mapa[xp+valorx2][yp+valory2]==0){
+						jugador->mapa[xp+valorx1][yp+valory1]=7;jugador->mapa[xp][yp]=ult;jugador->mapa[xp+valorx2][yp+valory2]=4;ult=0;
 					}
-					if(mapa[xp+valorx1][yp+valory1]==4&&mapa[xp+valorx2][yp+valory2]==5){
-						mapa[xp][yp]=ult;mapa[xp+valorx1][yp+valory1]=7;mapa[xp+valorx2][yp+valory2]=4;ult=0;
+					if(jugador->mapa[xp+valorx1][yp+valory1]==4&&jugador->mapa[xp+valorx2][yp+valory2]==5){
+						jugador->mapa[xp][yp]=ult;jugador->mapa[xp+valorx1][yp+valory1]=7;jugador->mapa[xp+valorx2][yp+valory2]=4;ult=0;
 					}
-					recarga(mapa,ficha);	
+					recarga(jugador->mapa,jugador->ficha);jugador->mov++;	
     			break;
 				case 'r':m=1;system("cls");break;
 				case 'q':m=1;break;	
 		    }
 		    if(tecla!='r'||tecla!='q'){
-		     recarga(mapa,ficha);valorx1=1,valorx2=2,valory1=1,valory2=2;system("cls");mostrar(mapa,x1,y1,ficha);
-		  	 printf("\n Cajas por apilar:%i ",f);
-		  	 int res=perdio(mapa,ficha);
+		     recarga(jugador->mapa,jugador->ficha);valorx1=1,valorx2=2,valory1=1,valory2=2;system("cls");mostrar(jugador->mapa,x1,y1,jugador->ficha);
+		  	 printf("\n Cajas por apilar:%i  Cantidad de movimientos:%i",f,jugador->mov);
+		  	 int res=perdio(jugador->mapa,jugador->ficha);
 		  	 res>0?printf("Perdio precione 'r' %i \n",res):printf(" ");
 			}
 		}
 	}
+
+	int aux=jugador->mundo-1,i;
+for(i=0;i<3;i++){
+	if(i==aux&&r->mund[i]>jugador->mov&&tecla!='q'){
+		r->mund[i]=jugador->mov;
+		strcpy(r->jug[i],jugador->nombre);
+		jugador->mov=0;
+	}
+}	
+
 	if(f==0){
 		printf("Ganastes :DDD \n");
 	} 	
    }
     if(tecla!='q') printf("Gracias por jugar :DDD"); system("pause");
 }
-struct jugadorInformacion{
-	int matriz[15][23];
-	int mov;
-	int mundo;
-	char nombre[20];
-};
+
 int main(int argc, char *argv[]){
-    int menu=0,estado=0;
+    struct jugadorInformacion jugador;
+    struct registro r;
+    int menu=0,primerJuego=0,i;jugador.estado=0;
+    for(i=0;i<3;i++){
+  	 r.mund[i]=999999;
+  	 strcpy(r.jug[i]," ");
+    }
     while(menu!=5){
     	system("cls");
-    	      printf("+-----------------------------+\n");
-    	      printf("|            *Sokoban*        |\n");
-    	      printf("|        1)--->Jugar          |\n");
-if(estado==1) printf("|        2)--->Continuar      |\n"); 
-    	      printf("|        3)--->Instruciones   |\n");
-    	      printf("|        4)--->Estadisticas   |\n");
-    		  printf("|        5)--->Salir          |\n");
-    	      printf("+-----------------------------+\n");
+    	              printf("+-----------------------------+\n");
+    	              printf("|            *Sokoban*        |\n");
+    	              printf("|        1)--->Jugar          |\n");
+if(jugador.estado!=0) printf("|        2)--->Continuar      |\n"); 
+    	              printf("|        3)--->Instruciones   |\n");
+    	              printf("|        4)--->Estadisticas   |\n");
+    		          printf("|        5)--->Salir          |\n");
+    	              printf("+-----------------------------+\n");
 		scanf("%i",&menu);
 		switch(menu){
 			case 1:
-				estado=1;
-				juego();/*juego 0*/
+				printf("Ingrese el nombre del jugador \n");
+				scanf("%s",&jugador.nombre);primerJuego++;
+				jugador.estado=1;jugador.mov=0;
+				juego(&jugador,&r);/*juego 0*/
 			break;
 			
 			case 2:
-				/*juego 1*/
+				jugador.estado=2;
+				juego(&jugador,&r);/*juego 1*/
 			break;
 			
 			case 3:
@@ -269,6 +297,15 @@ if(estado==1) printf("|        2)--->Continuar      |\n");
 			break;
 			
 			case 4:
+				if(primerJuego>0){
+    	              printf("|          Registro mejores puntaciones         |\n");
+    	              printf("| mundo |           jugador         |   mov     |\n");
+					for(i=0;i<3;i++){
+	       				if(r.mund[i]!=999999){ printf("%i           %s                   %i \n",i+1,r.jug[i],r.mund[i]);
+				        }else printf(" %i aun sin jugar \n",i+1);
+				    }
+				}else printf("Juegue una partida \n");
+				system("pause");
 			   /*cargar archivo*/
 			break;
 		}		   	    	    	
