@@ -259,15 +259,33 @@ for(i=0;i<3;i++){
    }
     if(tecla!='q') printf("Gracias por jugar :DDD"); system("pause");
 }
+void cargarRegistro(struct registro *r){
+	FILE *registro=fopen("registro.txt","rb");int i;
+	if(registro==NULL){
+		for(i=0;i<3;i++){
+  	      r->mund[i]=999999;
+  	      strcpy(r->jug[i]," ");
+         }
+	}else{
+		int mundo,mov,cont;char cadena[10];
+		while(feof(registro)==0){
+			fscanf(registro,"%d %s %d",&mundo,&cadena,&mov);					
+			strcpy(r->jug[mundo-1],cadena);
+			r->mund[mundo-1]=mov;	
+		}
+	}
+	fclose(registro);  
 
+}
 int main(int argc, char *argv[]){
-    struct jugadorInformacion jugador;
+    
+	struct jugadorInformacion jugador;
     struct registro r;
     int menu=0,primerJuego=0,i;jugador.estado=0;
-    for(i=0;i<3;i++){
-  	 r.mund[i]=999999;
-  	 strcpy(r.jug[i]," ");
-    }
+	
+	FILE *instruciones;    
+    cargarRegistro(&r);
+    
     while(menu!=5){
     	system("cls");
     	              printf("+-----------------------------+\n");
@@ -294,10 +312,12 @@ if(jugador.estado!=0) printf("|        2)--->Continuar      |\n");
 			
 			case 3:
 				/*cargar archivo*/
+            instruciones=fopen("Intruciones.txt","rb");
+				
 			break;
 			
 			case 4:
-				if(primerJuego>0){
+				if(primerJuego>0||r.mund[0]>0){
     	              printf("|          Registro mejores puntaciones         |\n");
     	              printf("| mundo |           jugador         |   mov     |\n");
 					for(i=0;i<3;i++){
