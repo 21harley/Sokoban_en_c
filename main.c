@@ -2,8 +2,10 @@
 #include <stdlib.h>
 #include <conio.h>
 #include <windows.h>
+#include <locale.h>
 
 /* sokoban por john llanes inicio 22-10-2019 */
+/* terminado 31-10-2019 1.0*/
 
 int x1=15;int y1=23;       /*mapa*/
 int xp=0 ,yp=0,caja=0,f=0; /*jugador*/
@@ -196,9 +198,9 @@ struct jugadorInformacion{
 };
 
 void juego(struct jugadorInformacion *jugador,struct registro *r){
-     char tecla=' ';
-     if(jugador->estado==1) jugador->mundo=0;
-   while(jugador->mundo<4&&tecla!='q'){
+    char tecla=' ';
+    if(jugador->estado==1) jugador->mundo=0;
+    while(jugador->mundo<4&&tecla!='q'){
    	 int valorx1=1,valorx2=2,valory1=1,valory2=2,ban=0;
     if(tecla!='r'&&jugador->estado==1) jugador->mundo++;system("cls");
 	if(jugador->estado==1) mapaCarga(jugador->mundo,jugador->mapa,jugador->ficha,r);				 
@@ -238,51 +240,84 @@ void juego(struct jugadorInformacion *jugador,struct registro *r){
 		    if(tecla!='r'||tecla!='q'){
 		     recarga(jugador->mapa,jugador->ficha);valorx1=1,valorx2=2,valory1=1,valory2=2;system("cls");mostrar(jugador->mapa,x1,y1,jugador->ficha);
 		  	 printf("\n Cajas por apilar:%i  Cantidad de movimientos:%i",f,jugador->mov);
-		  	 int res=perdio(jugador->mapa,jugador->ficha);
-		  	 res>0?printf("Perdio precione 'r' %i \n",res):printf(" ");
+			 int res=perdio(jugador->mapa,jugador->ficha);
+		  	 res>0?printf("Perdio :c precione 'r'=reiniciar mundo \n"):printf("\n 'w'=arriba 's'=abajo \n 'a'=izquierda  'd'=derecha \n 'q'=salir 'r'=reiniciar mundo \n");
 			}
 		}
 	}
 
 	int aux=jugador->mundo-1,i;
-for(i=0;i<3;i++){
-	if(i==aux&&r->mund[i]>jugador->mov&&tecla!='q'){
+    for(i=0;i<3;i++){
+	 if(i==aux&&r->mund[i]>jugador->mov&&tecla!='q'){
 		r->mund[i]=jugador->mov;
 		strcpy(r->jug[i],jugador->nombre);
-		jugador->mov=0;
-	}
-}	
-
+	  }
+    }	
 	if(f==0){
-		printf("Ganastes :DDD \n");
-	} 	
-   }
+		printf("Ganastes :DDD \n");jugador->mov=0;actualizar(r);
+		system("pause");
+	} 
+		
+   }//mundo
     if(tecla!='q') printf("Gracias por jugar :DDD"); system("pause");
+    
 }
 void cargarRegistro(struct registro *r){
-	FILE *registro=fopen("registro.txt","rb");int i;
+	FILE *registro=fopen("registro.txt","rb");int i,j;
 	if(registro==NULL){
 		for(i=0;i<3;i++){
   	      r->mund[i]=999999;
-  	      strcpy(r->jug[i]," ");
+  	      strcpy(r->jug[i],"-");
          }
 	}else{
 		int mundo,mov,cont;char cadena[10];
 		while(feof(registro)==0){
 			fscanf(registro,"%d %s %d",&mundo,&cadena,&mov);					
-			strcpy(r->jug[mundo-1],cadena);
-			r->mund[mundo-1]=mov;	
+			 strcpy(r->jug[mundo-1],cadena);
+			 r->mund[mundo-1]=mov;
 		}
 	}
 	fclose(registro);  
-
+}
+void actualizar(struct registro *r){//actualisa el registro de puntuaciones
+	FILE *regist=fopen("registro.txt","rb");
+	struct registro r1;
+	int i,j=0;
+	if(regist==NULL){
+		FILE *registro1=fopen("registro.txt","w");
+		for(i=0;i<3;i++){
+			fprintf(registro1,"%d %s %d \n",i+1,r->jug[i],r->mund[i]);
+		} 
+	    fclose(regist);
+	    fclose(registro1);
+	}else{
+		//registro anterior
+		int mundo,mov,cont;char cadena[10];
+		for(cont=0;cont<3;cont++){
+			fscanf(regist,"%d %s %d",&mundo,&cadena,&mov);	
+			 strcpy(r1.jug[cont],cadena);
+			 r1.mund[cont]=mov;
+			
+		}
+		fclose(regist);
+        FILE *registroA=fopen("registro.txt","w");
+        for(i=0;i<3;i++){
+        	if(r1.mund[i]>r->mund[i]){
+        		fprintf(registroA,"%d %s %d \n",i+1,r->jug[i],r->mund[i]);
+			}else{
+				fprintf(registroA,"%d %s %d \n",i+1,r1.jug[i],r1.mund[i]);
+			}
+		}
+	
+	}
+	
 }
 int main(int argc, char *argv[]){
-    
+    setlocale(LC_ALL, "spanish");
 	struct jugadorInformacion jugador;
     struct registro r;
     int menu=0,primerJuego=0,i;jugador.estado=0;
-	
+	char *letra;
 	FILE *instruciones;    
     cargarRegistro(&r);
     
@@ -312,8 +347,17 @@ if(jugador.estado!=0) printf("|        2)--->Continuar      |\n");
 			
 			case 3:
 				/*cargar archivo*/
-            instruciones=fopen("Intruciones.txt","rb");
-				
+            instruciones=fopen("Instruciones.txt","rb");
+			if(instruciones==NULL){
+				printf("No se encontro el archivo \n");
+			}else{
+				while(feof(instruciones)==0){
+					letra=fgetc(instruciones);
+					printf("%c",letra);
+				}
+			}
+			fclose(instruciones);
+			system("pause");	
 			break;
 			
 			case 4:
