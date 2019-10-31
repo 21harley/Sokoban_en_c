@@ -279,7 +279,7 @@ void cargarRegistro(struct registro *r){
 	}
 	fclose(registro);  
 }
-void actualizar(struct registro *r){//actualisa el registro de puntuaciones
+void actualizar(struct registro *r){//actualiza el registro de puntuaciones
 	FILE *regist=fopen("registro.txt","rb");
 	struct registro r1;
 	int i,j=0;
